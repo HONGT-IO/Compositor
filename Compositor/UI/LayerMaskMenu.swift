@@ -27,7 +27,7 @@ struct MaskAloneBadge: NSViewRepresentable {
                        closeHelp: "Show the image again (or Option-click the mask thumbnail)") { [session] in session.viewsMaskAlone = false }
     }
     func updateNSView(_ view: CanvasPillView, context: Context) {
-        view.title = "Layer Mask"
+        view.title = "Layer Mask".localized
         view.detail = layer.name
     }
 }
@@ -45,7 +45,7 @@ struct ProofBadge: NSViewRepresentable {
                                closeHelp: "Show the document's own colors again") { [session] in session.proofsColors = false }
     }
     func updateNSView(_ view: CanvasPillView, context: Context) {
-        view.title = gamut ? "CMYK Gamut Warning" : "CMYK Proof"
+        view.title = (gamut ? "CMYK Gamut Warning" : "CMYK Proof").localized
         view.detail = session.proofProfile?.name ?? ""
     }
 }
@@ -70,11 +70,11 @@ final class CanvasPillView: NSView {
         name.font = .systemFont(ofSize: 12)
         name.textColor = NSColor.white.withAlphaComponent(0.6)
         name.lineBreakMode = .byTruncatingTail
-        let button = NSButton(image: NSImage(systemSymbolName: "xmark", accessibilityDescription: closeLabel) ?? NSImage(),
+        let button = NSButton(image: NSImage(systemSymbolName: "xmark", accessibilityDescription: closeLabel.localized) ?? NSImage(),
                               target: nil, action: nil)
         button.isBordered = false
         button.symbolConfiguration = .init(pointSize: 9, weight: .bold)
-        button.toolTip = closeHelp
+        button.toolTip = closeHelp.localized
         stack = NSStackView(views: [icon, title, name, button])
         stack.spacing = 7
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 11, bottom: 0, right: 8)

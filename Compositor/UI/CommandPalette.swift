@@ -118,7 +118,9 @@ enum CommandPaletteMenu {
         var result: [CommandPaletteEntry] = []
         var sameTitle: [String: Int] = [:]
         for (index, item) in menu.items.enumerated() {
-            guard !item.isSeparatorItem, !item.isHidden, !skipping.contains(item.title), !item.title.isEmpty else { continue }
+            // Menu titles are already translated, including Window and Help, which macOS translates itself.
+            guard !item.isSeparatorItem, !item.isHidden, !item.title.isEmpty,
+                  !skipping.contains(item.title), !skipping.contains(where: { $0.localized == item.title }) else { continue }
             if let submenu = item.submenu {
                 if path.isEmpty, index == 0 { continue } // The app menu: About, Hide, Quit.
                 result += collect(submenu, root: root, path: path + [item.title], skipping: skipping, seen: &seen)
@@ -177,9 +179,11 @@ extension CommandPaletteEntry {
         let selected = session.selection != nil
         return [
             CommandPaletteEntry(id: selected ? "Layer › Add Layer Mask from Selection" : "Layer › Add Layer Mask",
+                                title: (selected ? "Layer › Add Layer Mask from Selection" : "Layer › Add Layer Mask").localized,
                                 shortcut: nil, isEnabled: canAdd,
                                 perform: { [weak session] in session?.addMask(revealing: true) }),
             CommandPaletteEntry(id: selected ? "Layer › Add Layer Mask Hiding Selection" : "Layer › Add Layer Mask (Hide All)",
+                                title: (selected ? "Layer › Add Layer Mask Hiding Selection" : "Layer › Add Layer Mask (Hide All)").localized,
                                 shortcut: nil, isEnabled: canAdd,
                                 perform: { [weak session] in session?.addMask(revealing: false) }),
         ]
@@ -216,7 +220,8 @@ extension CommandPaletteEntry {
             ("Zoom", "Z", .zoom, nil),
         ]
         return tools.map { name, key, tool, setup in
-            CommandPaletteEntry(id: "Tool › \(name)", shortcut: key, isEnabled: session.document != nil,
+            CommandPaletteEntry(id: "Tool › \(name)", title: "\("Tool".localized) › \(name.localized)",
+                                shortcut: key, isEnabled: session.document != nil,
                                 perform: { [weak session] in
                                     guard let session else { return }
                                     session.selectTool(tool)

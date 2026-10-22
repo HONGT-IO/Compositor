@@ -9,10 +9,10 @@ nonisolated enum NewCanvasUnit: String, CaseIterable, Sendable {
     /// The unit written out, for the summary line's pill.
     var name: String {
         switch self {
-        case .pixels: "Pixels"
-        case .inches: "Inches"
-        case .centimeters: "Centimeters"
-        case .millimeters: "Millimeters"
+        case .pixels: "Pixels".localized
+        case .inches: "Inches".localized
+        case .centimeters: "Centimeters".localized
+        case .millimeters: "Millimeters".localized
         }
     }
     /// The next unit, for the pill: px → in → cm → mm → px.
@@ -44,7 +44,7 @@ nonisolated enum NewCanvasUnit: String, CaseIterable, Sendable {
 /// What a new canvas starts as: see-through, or a Background layer of white or black.
 nonisolated enum NewCanvasBackground: String, CaseIterable, Sendable {
     case transparent, white, black
-    var title: String { "\(rawValue.capitalized) canvas" }
+    var title: String { "\(rawValue.capitalized) canvas".localized }
     var next: NewCanvasBackground { Self.allCases[(Self.allCases.firstIndex(of: self)! + 1) % Self.allCases.count] }
     var color: CGColor? {
         switch self {
@@ -202,12 +202,12 @@ struct NewCanvasSheet: View {
     }
     private func dimension(_ title: String, text: Binding<String>, field: Field) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.callout.weight(.medium))
+            Text(title.localized).font(.callout.weight(.medium))
             HStack {
-                TextField(title, text: text).textFieldStyle(.plain)
+                TextField(title.localized, text: text).textFieldStyle(.plain)
                     .focused($focusedField, equals: field)
                     .accessibilityIdentifier(title.lowercased() + "Input")
-                Text(unit.rawValue).foregroundStyle(.secondary)
+                Text(unit.rawValue.localized).foregroundStyle(.secondary)
             }
             .padding(12).background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 7))
         }
@@ -223,14 +223,14 @@ private struct CyclePill: View {
     init(_ title: String, help: String, action: @escaping () -> Void) { self.title = title; self.help = help; self.action = action }
     var body: some View {
         Button(action: action) {
-            Text(title).foregroundStyle(.secondary).monospacedDigit()
+            Text(title.localized).foregroundStyle(.secondary).monospacedDigit()
                 .padding(.horizontal, 6).padding(.vertical, 2)
                 .background(.quaternary.opacity(hovering ? 1 : 0), in: Capsule())
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .help(help)
+        .help(help.localized)
     }
 }
 

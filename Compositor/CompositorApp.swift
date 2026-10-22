@@ -40,9 +40,9 @@ struct CompositorApp: App {
                         }
                             .configuredKeyboardShortcut("z", modifiers: [.command, .shift])
                     } else {
-                        Button(session.history.canUndo ? "Undo \(session.history.undoName)" : "Undo") { session.undo() }
+                        Button(session.history.canUndo ? String(localized: "Undo \(session.history.undoName.localized)") : "Undo".localized) { session.undo() }
                             .configuredKeyboardShortcut("z").disabled(!session.canUndo)
-                        Button(session.history.canRedo ? "Redo \(session.history.redoName)" : "Redo") { session.redo() }
+                        Button(session.history.canRedo ? String(localized: "Redo \(session.history.redoName.localized)") : "Redo".localized) { session.redo() }
                             .configuredKeyboardShortcut("z", modifiers: [.command, .shift]).disabled(!session.canRedo)
                     }
                 }
@@ -101,6 +101,24 @@ struct CompositorApp: App {
                 Group {
                     CommandGroup(after: .appInfo) {
                         Button("Check for Updates…") { applicationDelegate.updater.checkForUpdates() }
+                        Menu("Language") {
+                            Toggle(isOn: Binding(get: { AppLanguage.selected == .system },
+                                                 set: { if $0 { AppLanguage.choose(.system) } })) {
+                                Text("Follow System")
+                            }
+                            Toggle(isOn: Binding(get: { AppLanguage.selected == .english },
+                                                 set: { if $0 { AppLanguage.choose(.english) } })) {
+                                Text(verbatim: "English")
+                            }
+                            Toggle(isOn: Binding(get: { AppLanguage.selected == .simplified },
+                                                 set: { if $0 { AppLanguage.choose(.simplified) } })) {
+                                Text(verbatim: "简体中文")
+                            }
+                            Toggle(isOn: Binding(get: { AppLanguage.selected == .traditional },
+                                                 set: { if $0 { AppLanguage.choose(.traditional) } })) {
+                                Text(verbatim: "繁體中文")
+                            }
+                        }
                     }
                     CommandGroup(after: .toolbar) {
                         Button("Search Commands…") {
@@ -299,7 +317,7 @@ struct CompositorApp: App {
                     Button("Hue/Saturation…") { session.beginHueSaturation() }
                         .configuredKeyboardShortcut("u").disabled(!session.canAdjustColors)
                     ForEach([FilterKind.blackWhite, .colorBalance, .exposure, .gradientMap, .grain], id: \.self) { kind in
-                        Button("\(kind.rawValue)…") { session.beginFilter(kind) }
+                        Button(kind.rawValue.localized + "…") { session.beginFilter(kind) }
                             .disabled(!session.canAdjustColors || session.hueSaturation != nil)
                     }
                     Button(session.isMaskSelected ? "Invert Mask" : "Invert") { Task { await session.invertPixels() } }
@@ -327,21 +345,21 @@ struct CompositorApp: App {
                     }
                 }
                 CommandMenu("Filter") {
-                    Button(session.lastFilter.map { "Last Filter: " + $0.rawValue } ?? "Last Filter") {
+                    Button(session.lastFilter.map { String(localized: "Last Filter: \($0.rawValue.localized)") } ?? "Last Filter") {
                         Task { await session.repeatLastFilter() }
                     }
                         // ⌃⌘F, as in Photoshop; ⌘F is the command palette.
                         .configuredKeyboardShortcut("f", modifiers: [.command, .control]).disabled(!session.canRepeatLastFilter)
                     Divider()
                     ForEach(FilterKind.allCases.filter { $0 != .contentAwareFill && !$0.isImageAdjustment }, id: \.self) { kind in
-                        Button("\(kind.rawValue)…") { session.beginFilter(kind) }
+                        Button(kind.rawValue.localized + "…") { session.beginFilter(kind) }
                             .disabled(!(kind == .vignette ? session.canVignette : session.canAdjustColors) || session.hueSaturation != nil)
                     }
                 }
                 CommandMenu("Layer") {
                     Menu("New Adjustment Layer") {
                         ForEach(AdjustmentKind.allCases, id: \.self) { kind in
-                            Button(kind.rawValue + (kind.isEditable ? "…" : "")) { session.addAdjustment(kind) }
+                            Button(kind.rawValue.localized + (kind.isEditable ? "…" : "")) { session.addAdjustment(kind) }
                         }
                     }.disabled(!session.canEditLayers || session.document == nil)
                     Button("Edit Adjustment…") {
@@ -378,7 +396,7 @@ struct CompositorApp: App {
                     Button("Move Layer Down") { session.moveActiveLayer(by: -1) }
                         .configuredKeyboardShortcut("[").disabled(!session.canMoveActiveLayer(by: -1))
                     Group {
-                        Button(session.mergeTitle) { session.mergeLayers() }
+                        Button(session.mergeTitle.localized) { session.mergeLayers() }
                             .configuredKeyboardShortcut("e").disabled(!session.canMergeLayers)
                         Divider()
                         Button("Flip Layer Horizontal") { session.flipLayers(horizontally: true) }
@@ -387,7 +405,7 @@ struct CompositorApp: App {
                             .disabled(!session.canTransform)
                     }
                     Divider()
-                    Button(session.selectedEffect != nil ? "Delete " + session.selectedEffect!.kind.rawValue : session.isMaskSelected && session.activeLayer?.mask != nil ? "Delete Layer Mask" : session.selectedLayerIDs.count > 1 ? "Delete Layers" : "Delete Layer") {
+                    Button(session.selectedEffect != nil ? String(localized: "Delete \(session.selectedEffect!.kind.rawValue.localized)") : session.isMaskSelected && session.activeLayer?.mask != nil ? "Delete Layer Mask" : session.selectedLayerIDs.count > 1 ? "Delete Layers" : "Delete Layer") {
                         session.deleteLayerOrMask()
                     }
                         .disabled(!session.canEditLayers || session.activeLayer == nil)
@@ -399,7 +417,7 @@ struct CompositorApp: App {
     private func loadCMYKProfile() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [UTType(filenameExtension: "icc") ?? .data, UTType(filenameExtension: "icm") ?? .data]
-        panel.message = "Choose a CMYK ICC profile, such as the one your printer gave you"
+        panel.message = "Choose a CMYK ICC profile, such as the one your printer gave you".localized
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do { session.proofProfile = try CMYK.load(url) }
         catch { session.importError = error.localizedDescription }

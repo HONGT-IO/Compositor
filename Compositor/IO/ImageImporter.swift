@@ -46,10 +46,10 @@ nonisolated enum ImageImportError: LocalizedError {
     case unreadable, unsupported, tooLarge, locked
     var errorDescription: String? {
         switch self {
-        case .unreadable: "The image could not be read. It may be damaged or unavailable."
-        case .unsupported: "Choose a JPEG, PNG, HEIC, HEIF, TIFF, WebP, PDF, or Photoshop (PSD) file."
-        case .locked: "This PDF is password-protected. Save an unlocked copy, then import that."
-        case .tooLarge: "This import exceeds the current \(DocumentLimits.documentBudgetMegapixels)-megapixel document budget or \(DocumentLimits.maxSide.formatted())-pixel side limit."
+        case .unreadable: "The image could not be read. It may be damaged or unavailable.".localized
+        case .unsupported: "Choose a JPEG, PNG, HEIC, HEIF, TIFF, WebP, PDF, or Photoshop (PSD) file.".localized
+        case .locked: "This PDF is password-protected. Save an unlocked copy, then import that.".localized
+        case .tooLarge: String(localized: "This import exceeds the current \(DocumentLimits.documentBudgetMegapixels)-megapixel document budget or \(DocumentLimits.maxSide.formatted())-pixel side limit.")
         }
     }
 }
